@@ -7,48 +7,69 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 
+import java.util.List;
+
 public class AnimationGame extends ApplicationAdapter implements InputProcessor {
 	SpriteBatch batch;
-	Texture img;
-	int x, y;
-	int dx, dy;
+	Texture img, monster;
+	int mx, mdx;
+	int y, dy;
 	
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
 		img = new Texture("Man.png");
-		x = 0;
+		monster = new Texture("Monster.png");
 		y = 0;
-		dx = 0;
 		dy = 0;
+		mx = Gdx.graphics.getWidth();
+		mdx = -3;
 
 		Gdx.input.setInputProcessor(this);
 	}
 
 	@Override
 	public void render () {
-		x += dx;
+		// move all items with time
+		moveByTime();
+
+		// check the monster is killed, render a new one
+		if (checkKill()){
+			mx = Gdx.graphics.getWidth();
+		}
+
+		ScreenUtils.clear(1, 1, 1, 1);
+		batch.begin();
+		batch.draw(img, 50, y, 100, 120);
+		batch.draw(monster, mx, 0, 120, 100);
+		batch.end();
+	}
+
+	private boolean checkKill() {
+		if (y <= 100 && (150 >= mx && 50 < mx + 120)){
+			return true;
+		}
+		return false;
+	}
+
+	private void moveByTime() {
+		// check if user is jumping or in the air
 		y += dy;
 		if (y > 0) {
-			dy -= 3;
+			dy -= 2;
 		}
 		if (y <= 0){
 			y = 0;
 			dy = 0;
 		}
-		if (dx > 0){
-			dx -= 1;
-		}
-		if (dx < 0 ){
-			dx += 1;
-		}
 
-		ScreenUtils.clear(1, 1, 1, 1);
-		batch.begin();
-		batch.draw(img, x, y, 100, 120);
-		batch.end();
+		// monster moves
+		mx += mdx;
+		if (mx < 0 || mx > Gdx.graphics.getWidth()){
+			mdx = -mdx;
+		}
 	}
-	
+
 	@Override
 	public void dispose () {
 		batch.dispose();
@@ -72,11 +93,6 @@ public class AnimationGame extends ApplicationAdapter implements InputProcessor 
 
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-		if (screenX > x){
-			dx += 20;
-		} else {
-			dx -= 20;
-		}
 		dy += 30;
 		return true;
 	}
