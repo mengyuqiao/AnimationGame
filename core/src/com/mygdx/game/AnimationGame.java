@@ -11,19 +11,25 @@ import java.util.List;
 
 public class AnimationGame extends ApplicationAdapter implements InputProcessor {
 	SpriteBatch batch;
-	Texture img, monster;
+	Texture human, human_attack1, human_attack2, monster;
 	int mx, mdx;
 	int y, dy;
+	int human_status;
+	int attacking;
 	
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
-		img = new Texture("Man.png");
+		human = new Texture("Man.png");
+		human_attack1 = new Texture("Attack1.png");
+		human_attack2 = new Texture("Attack2.png");
 		monster = new Texture("Monster.png");
 		y = 0;
 		dy = 0;
 		mx = Gdx.graphics.getWidth();
 		mdx = -3;
+		human_status = 0;
+		attacking = 0;
 
 		Gdx.input.setInputProcessor(this);
 	}
@@ -33,6 +39,9 @@ public class AnimationGame extends ApplicationAdapter implements InputProcessor 
 		// move all items with time
 		moveByTime();
 
+		// check
+		checkAttack();
+
 		// check the monster is killed, render a new one
 		if (checkKill()){
 			mx = Gdx.graphics.getWidth();
@@ -40,9 +49,31 @@ public class AnimationGame extends ApplicationAdapter implements InputProcessor 
 
 		ScreenUtils.clear(1, 1, 1, 1);
 		batch.begin();
-		batch.draw(img, 50, y, 100, 120);
+		switch (human_status){
+			case 1:
+				batch.draw(human_attack1, 50, y, 100, 120);
+				break;
+			case 2:
+				batch.draw(human_attack2, 50, y, 100, 120);
+				break;
+			default:
+				batch.draw(human, 50, y, 100, 120);
+		}
+
 		batch.draw(monster, mx, 0, 120, 100);
 		batch.end();
+	}
+
+	private void checkAttack() {
+		if (attacking > 15 && attacking <= 30){
+			human_status = 1;
+			attacking--;
+		}else if (attacking > 0 && attacking <= 15){
+			human_status = 2;
+			attacking--;
+		}else {
+			human_status = 0;
+		}
 	}
 
 	private boolean checkKill() {
@@ -73,7 +104,10 @@ public class AnimationGame extends ApplicationAdapter implements InputProcessor 
 	@Override
 	public void dispose () {
 		batch.dispose();
-		img.dispose();
+		human.dispose();
+		human_attack1.dispose();
+		human_attack2.dispose();
+		monster.dispose();
 	}
 
 	@Override
@@ -93,7 +127,8 @@ public class AnimationGame extends ApplicationAdapter implements InputProcessor 
 
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-		dy += 30;
+		attacking = 30;
+//		dy += 30;
 		return true;
 	}
 
