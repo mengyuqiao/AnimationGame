@@ -11,8 +11,9 @@ import java.util.List;
 
 public class AnimationGame extends ApplicationAdapter implements InputProcessor {
 	SpriteBatch batch;
-	Texture human, human_attack1, human_attack2, monster;
-	int mx, mdx;
+	Texture human, human_attack1, human_attack2, pig_alive, pig_dead, arrow;
+	Arrow arr;
+	Pig pig;
 	int y, dy;
 	int human_status;
 	int attacking;
@@ -23,11 +24,13 @@ public class AnimationGame extends ApplicationAdapter implements InputProcessor 
 		human = new Texture("Man.png");
 		human_attack1 = new Texture("Attack1.png");
 		human_attack2 = new Texture("Attack2.png");
-		monster = new Texture("Monster.png");
+		pig = new Pig();
+		pig_alive = new Texture(pig.getImg());
+		pig_dead = new Texture(pig.getDeath_img());
+		arr = new Arrow();
+		arrow = new Texture(arr.getImg());
 		y = 0;
 		dy = 0;
-		mx = Gdx.graphics.getWidth();
-		mdx = -3;
 		human_status = 0;
 		attacking = 0;
 
@@ -43,12 +46,11 @@ public class AnimationGame extends ApplicationAdapter implements InputProcessor 
 		checkAttack();
 
 		// check the monster is killed, render a new one
-		if (checkKill()){
-			mx = Gdx.graphics.getWidth();
-		}
+		checkKill();
 
 		ScreenUtils.clear(1, 1, 1, 1);
 		batch.begin();
+		// draw human
 		switch (human_status){
 			case 1:
 				batch.draw(human_attack1, 50, y, 100, 120);
@@ -60,7 +62,18 @@ public class AnimationGame extends ApplicationAdapter implements InputProcessor 
 				batch.draw(human, 50, y, 100, 120);
 		}
 
-		batch.draw(monster, mx, 0, 120, 100);
+		// draw arrow
+		if (arr.isShow()){
+			batch.draw(arrow, arr.getX(),arr.getY(),75,25);
+		}
+
+		// draw monsters
+		if (pig.checkDeath()){
+			batch.draw(pig_dead, pig.getX(), 0, 120, 100);
+		}else{
+			batch.draw(pig_alive, pig.getX(), 0, 120, 100);
+		}
+
 		batch.end();
 	}
 
@@ -69,6 +82,7 @@ public class AnimationGame extends ApplicationAdapter implements InputProcessor 
 			human_status = 1;
 			attacking--;
 		}else if (attacking > 0 && attacking <= 15){
+			arr.setShow();
 			human_status = 2;
 			attacking--;
 		}else {
@@ -76,11 +90,11 @@ public class AnimationGame extends ApplicationAdapter implements InputProcessor 
 		}
 	}
 
-	private boolean checkKill() {
-		if (y <= 100 && (150 >= mx && 50 < mx + 120)){
-			return true;
+	private void checkKill() {
+		if (pig.getX() <= arr.getX()+50){
+			arr.setShow();
+			pig.setDead(true);
 		}
-		return false;
 	}
 
 	private void moveByTime() {
@@ -95,9 +109,14 @@ public class AnimationGame extends ApplicationAdapter implements InputProcessor 
 		}
 
 		// monster moves
-		mx += mdx;
-		if (mx < 0 || mx > Gdx.graphics.getWidth()){
-			mdx = -mdx;
+		pig.move();
+
+		// arrow move
+		if (arr.isShow()){
+			arr.move();
+			if (arr.getX()>=Gdx.graphics.getWidth()){
+				arr.setShow();
+			}
 		}
 	}
 
@@ -107,7 +126,9 @@ public class AnimationGame extends ApplicationAdapter implements InputProcessor 
 		human.dispose();
 		human_attack1.dispose();
 		human_attack2.dispose();
-		monster.dispose();
+		pig_alive.dispose();
+		pig_dead.dispose();
+		arrow.dispose();
 	}
 
 	@Override
@@ -128,7 +149,6 @@ public class AnimationGame extends ApplicationAdapter implements InputProcessor 
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 		attacking = 30;
-//		dy += 30;
 		return true;
 	}
 
