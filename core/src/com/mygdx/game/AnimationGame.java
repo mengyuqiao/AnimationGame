@@ -11,12 +11,13 @@ import java.util.List;
 
 public class AnimationGame extends ApplicationAdapter implements InputProcessor {
 	SpriteBatch batch;
-	Texture human, human_attack1, human_attack2, pig_alive, pig_dead, arrow;
+	Texture human, human_attack1, human_attack2, pig_alive, pig_dead, arrow, background;
 	Arrow arr;
 	Pig pig;
 	int y, dy;
 	int human_status;
 	int attacking;
+	int bgx = 0;
 	
 	@Override
 	public void create () {
@@ -24,6 +25,8 @@ public class AnimationGame extends ApplicationAdapter implements InputProcessor 
 		human = new Texture("Man.png");
 		human_attack1 = new Texture("Attack1.png");
 		human_attack2 = new Texture("Attack2.png");
+		background = new Texture("Background.png");
+		background.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
 		pig = new Pig();
 		pig_alive = new Texture(pig.getImg());
 		pig_dead = new Texture(pig.getDeath_img());
@@ -50,6 +53,8 @@ public class AnimationGame extends ApplicationAdapter implements InputProcessor 
 
 		ScreenUtils.clear(1, 1, 1, 1);
 		batch.begin();
+		bgx = (bgx + 3)%(background.getWidth());
+		batch.draw(background, 0, 0, bgx, 0,1518, 500);
 		// draw human
 		switch (human_status){
 			case 1:
@@ -92,8 +97,10 @@ public class AnimationGame extends ApplicationAdapter implements InputProcessor 
 
 	private void checkKill() {
 		if (pig.getX() <= arr.getX()+50){
-			arr.setShow();
-			pig.setDead(true);
+			if (arr.isShow()){
+				arr.setShow();
+				pig.setDead(true);
+			}
 		}
 	}
 
