@@ -64,7 +64,9 @@ public class AnimationGame extends ApplicationAdapter implements InputProcessor 
 
 		ScreenUtils.clear(1, 1, 1, 1);
 		batch.begin();
+		// if the game is still going on
 		if (!game_over){
+			// draw background image
 			bgx = (bgx + 1)%(background.getWidth());
 			batch.draw(background, 0, 0, bgx, 0,1518, 500);
 			// draw human
@@ -94,29 +96,35 @@ public class AnimationGame extends ApplicationAdapter implements InputProcessor 
 			// draw retry time
 			font.draw(batch, "Retry: "+ retry, 5, Gdx.graphics.getHeight());
 		}
+		// if the game is over
 		else{
 			font.draw(batch, "Game Over", (int)(Gdx.graphics.getWidth()/2)-30, (int)(Gdx.graphics.getHeight()/2));
 		}
-		// draw point
+		// draw point forever
 		font.draw(batch, "Point: "+ point, Gdx.graphics.getWidth()-60, Gdx.graphics.getHeight());
 
 		batch.end();
 	}
 
 	private void checkAttack() {
+		// attack posture one
 		if (attacking > 15 && attacking <= 30){
 			human_status = 1;
 			attacking--;
-		}else if (attacking > 0 && attacking <= 15){
+		}
+		// attack posture two
+		else if (attacking > 0 && attacking <= 15){
 			arr.setShow();
 			human_status = 2;
 			attacking--;
-		}else {
+		}else { // end attack
 			human_status = 0;
 		}
 	}
 
+	// check if the monster or the human is killed
 	private void checkKill() {
+		// check pig's kill
 		if (pig.getX() <= arr.getX()+50){
 			if (arr.isShow()){
 				point++;
@@ -125,6 +133,7 @@ public class AnimationGame extends ApplicationAdapter implements InputProcessor 
 			}
 		}
 
+		// check human's kill
 		if (pig.getX() <= 150 && pig.getX() >= 50){
 			pig.setX(Gdx.graphics.getWidth());
 			retry--;
@@ -134,6 +143,7 @@ public class AnimationGame extends ApplicationAdapter implements InputProcessor 
 		}
 	}
 
+	// move all the elements by every frame
 	private void moveByTime() {
 		// check if user is jumping or in the air
 		y += dy;
@@ -185,11 +195,12 @@ public class AnimationGame extends ApplicationAdapter implements InputProcessor 
 
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+		// if game is over, restart the game
 		if (game_over){
 			game_over = false;
 			retry = 5;
 			point = 0;
-		}else{
+		}else{ // if the game is still going on, attack the monster
 			attacking = 30;
 		}
 		return true;
